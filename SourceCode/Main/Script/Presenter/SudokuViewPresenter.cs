@@ -23,7 +23,7 @@ namespace Sudoku
         private int                  _Size;
         private int                  _Tips;
         private bool                 _Fulfilled;
-        private float                _PassTime;
+        private float                _StartTime;
         private List<NumberListener> _Numbers;
         private List<ReviewListener> _Reviews;
         private OptionListener       _ConstructListener;
@@ -152,8 +152,10 @@ namespace Sudoku
                 if (!_Fulfilled) { return; }
             }
 
+            var passTime = Time.realtimeSinceStartup - _StartTime;
+
             string message 
-                = string.Format("恭喜完成\n使用時間：{0}：{1}", (int)_PassTime / 60, _PassTime % 60);
+                = string.Format("恭喜完成\n使用時間：{0}：{1}", (int)passTime / 60, (int)passTime % 60);
 
             if (_Fulfilled) { SettleEvents(new SendMessage(message)); }
         }
@@ -249,16 +251,7 @@ namespace Sudoku
                     _Numbers[index++].gameObject.SetActive(true);
                 });
 
-            _PassTime = 0f;
             _Fulfilled = false;
-            var interval = 1f;
-            Observable
-                .Interval(TimeSpan.FromSeconds(interval))
-                .Where((time) => !_Fulfilled)
-                .Subscribe(time =>
-                {
-                    _PassTime += interval;
-                });
         }
 
         private void SettleEvents(params IDomainEvent[] events) 
